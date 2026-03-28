@@ -1,4 +1,12 @@
-all: clean
-	g++ -g -std=c++20 main.cpp decompile.cpp -o refinery -Wall -Werror
+CXX=g++
+CXXFLAGS=-g -std=c++20 -Wall -Werror
+.PHONY: ../libpropfile/libpropfile.a
+all: refinery 
+refinery: main.o compile.o link.o ../libpropfile/libpropfile.a
+	$(CXX) $(CXXFLAGS) $^ -o $@
+../libpropfile/libpropfile.a:
+	make -C ../libpropfile
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $<
 clean:
-	rm refinery || true
+	rm -f *.o refinery

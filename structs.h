@@ -10,7 +10,7 @@ struct Instr {
     uint32_t extra;      // 4
     uint16_t reserved;   // 2
     uint8_t  opcode;     // 1
-    uint8_t  flags;      // 1
+    uint8_t  flags;      // 1p
 };
 static_assert(sizeof(Instr) == 16, "Instr must be 16 bytes");
 inline Instr makeInstr(uint8_t opcode) {
