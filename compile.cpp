@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <charconv>
 #include "refinery.h"
+#include <iostream>
 struct Tokenizer {
     std::string remaining; // owns the string now
 };
@@ -11,40 +12,23 @@ struct Tokenizer {
 std::optional<std::string> tokenize(std::optional<std::string> input, Tokenizer& state, const char* delims) {
     if (input) {
         state.remaining = *input;
-        // printf("[tokenize] new input: '%s'\n", state.remaining.c_str());
     }
-
     while (!state.remaining.empty()) {
-        // --- skip leading delimiters ---
         size_t start = 0;
         while (start < state.remaining.size() && strchr(delims, state.remaining[start])) start++;
         if (start == state.remaining.size()) {
             state.remaining.clear();
-            // printf("[tokenize] only delimiters left, returning nullopt\n");
             return std::nullopt;
         }
         state.remaining.erase(0, start);
-        // printf("[tokenize] after skipping delimiters, remaining: '%s'\n", state.remaining.c_str());
-
-        // --- find next delimiter ---
         size_t end = 0;
         while (end < state.remaining.size() && !strchr(delims, state.remaining[end])) end++;
-
-        // --- grab the token ---
         std::string token = state.remaining.substr(0, end);
-        state.remaining.erase(0, end); // remove the token safely
-
+        state.remaining.erase(0, end);
         if (!token.empty()) {
-            // printf("[tokenize] found token: '%s', remaining after: '%s'\n",
-            //        token.c_str(),
-            //        state.remaining.c_str());
             return token;
         }
-
-        // loop continues if somehow token was empty
     }
-
-    // printf("[tokenize] no more tokens, returning nullopt\n");
     return std::nullopt;
 }
 std::optional<std::string> getNextLine(std::optional<std::string> input, Tokenizer& state){
@@ -142,8 +126,31 @@ Value getOperandForInstruction(std::string& instr,Tokenizer& save){
 		std::optional<std::string> word=getNextWord(std::nullopt,save);
 		if (!word) throw std::runtime_error("Invalid loadstring, missing operand");
 		std::string raw=*word;
-		// std::string proper=checkQuot(raw);
-		v.value=*word;
+		v.value=raw;
+		if (getNextWord(std::nullopt,save)) throw std::runtime_error("Too many operands");
+		return v;
+	} else if (type==OperandType::StringLiteral){
+		v.type=ValueType::String;
+		std::optional<std::string> word=getNextWord(std::nullopt,save);
+		if (!word) throw std::runtime_error("Invalid loadstring, missing operand");
+		std::string raw=*word;
+		if (raw.front()!='\"' && raw.front()!='\''){
+			throw std::runtime_error("Unquoted string");
+		}
+		for (;;){
+			std::optional<std::string> nextword=getNextWord(std::nullopt,save);
+			if (nextword){
+				raw += " ";
+				raw += *nextword;
+			} else {
+				break;
+			}
+		}
+		if (raw.back()!='\"' && raw.back()!='\''){
+			throw std::runtime_error("Unterminated string");
+		}
+		std::string contents=raw.substr(1, raw.size()-2);
+		v.value=contents;
 		if (getNextWord(std::nullopt,save)) throw std::runtime_error("Too many operands");
 		return v;
 	} else if (type==OperandType::Float){

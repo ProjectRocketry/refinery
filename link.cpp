@@ -67,7 +67,7 @@ StrippedPropellant strip(const LinkedPropellant& prop){
 }
 uint64_t handleStringOperand(const Opcode opcode, const std::string& value, LinkFnContext& ctx){
     OperandType expected=operandTypeFor(static_cast<uint8_t>(opcode));
-    if (expected!=OperandType::String) INTERNAL_ERROR("EINVALIDSTRINGOPERAND");
+    if (expected!=OperandType::String && expected!=OperandType::StringLiteral) INTERNAL_ERROR("EINVALIDSTRINGOPERAND");
     uint64_t id=hash64(value);
     switch (opcode){
         case Opcode::SaveVar:

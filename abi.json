@@ -1,1 +1,7 @@
-{}
+[
+	{
+		"name":"print",
+		"returnType":"null",
+		"argTypes":["any"]
+	}
+]
