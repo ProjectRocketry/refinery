@@ -80,6 +80,8 @@ ValueType getValueType(const std::string& typeString,bool allowEntry){
 		return ValueType::Null;
 	} else if (typeString=="bool"){
 		return ValueType::Bool;
+	} else if (typeString=="any"){
+		return ValueType::Any;
 	}
 	throw std::runtime_error("Unknown type "+typeString);
 }

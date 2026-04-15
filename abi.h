@@ -20,6 +20,7 @@ inline std::string valueTypeToString(ValueType t) {
         case ValueType::Bool:   return "bool";
         case ValueType::UInt:   return "uint";
         case ValueType::Entry:  return "entry";
+        case ValueType::Any:    return "any";
         default: throw std::runtime_error("Unknown ValueType");
     }
 }
@@ -33,7 +34,7 @@ inline ValueType stringToValueType(const std::string& s) {
     if (s == "uint")   return ValueType::UInt;
     if (s == "entry")  return ValueType::Entry;
     if (s == "void")   return ValueType::Null; // for ABI convenience
-
+    if (s == "any")    return ValueType::Any;
     throw std::runtime_error("Unknown ValueType string: " + s);
 }
 

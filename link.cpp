@@ -105,6 +105,8 @@ uint64_t handleStringOperand(const Opcode opcode, const std::string& value, Link
             id=resolveCallNative(value,ctx);//TODO: write
             ctx.debug.callNativeNames[id] = value;
             return id;
+        case Opcode::Coerce:
+            return static_cast<uint64_t>(getValueType(value,false));
         default:
             ctx.ctx.stringTable[id]=value;
             return id;
@@ -362,7 +364,7 @@ void doValidation(const LinkedPropellant& prop, const LinkContext& ctx){
         }
     }
 }
-LinkedPropellant link(const UnlinkedPropellant& prop, std::string& abiFilepath){
+LinkedPropellant link(const UnlinkedPropellant& prop, std::string& abiFilepath, bool novalidate){
     LinkedPropellant linked;
     LinkContext ctx;
     ctx.callNativeTable=getABITable(abiFilepath);
@@ -378,7 +380,9 @@ LinkedPropellant link(const UnlinkedPropellant& prop, std::string& abiFilepath){
     linked.symbols=ctx.symbols;
     if (!ctx.entryFuncFound) REFERENCE_ERROR("Entrypoint missing");
     throwErrors(false);
-    doValidation(linked,ctx);
-    throwErrors(true);
+    if (!novalidate){
+        doValidation(linked,ctx);
+        throwErrors(true);
+    }
     return linked;
 }

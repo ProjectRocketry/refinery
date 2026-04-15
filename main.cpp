@@ -2,6 +2,12 @@
 #include "refinery.h"
 #include "../libpropfile/propfile.h"
 #include <fstream>
+#include <filesystem>
+std::optional<std::string> get_env(const std::string& name) {
+    if (const char* val = std::getenv(name.c_str()))
+        return std::string(val);
+    return std::nullopt;
+}
 int main(int argc, char const *argv[])
 {
 	std::vector<std::string> args(argv + 1, argv + argc);
@@ -12,8 +18,9 @@ int main(int argc, char const *argv[])
 	UnlinkedPropellant prop;
 	PropellantObject obj=compileFile(args[0]);
 	prop.objects.push_back(obj);
+	std::filesystem::path path=argv[0];
 	std::string abi="abi.json";
-	LinkedPropellant lprop=link(prop,abi);
+	LinkedPropellant lprop=link(prop,abi,get_env("REFINERY_NO_VALIDATION").has_value());
 	std::vector<uint8_t> buf;
 	if (false){
 		StrippedPropellant sprop=strip(lprop);
